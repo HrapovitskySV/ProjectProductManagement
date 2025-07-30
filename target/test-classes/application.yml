@@ -18,6 +18,7 @@ spring:
   sql:
     init:
       mode: always
+      separator: ^
       #mode: never
       #data-locations: data.sql
       #schema-locations: schema.sql

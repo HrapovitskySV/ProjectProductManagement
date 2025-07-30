@@ -13,7 +13,7 @@ import ru.otus.hw.models.dto.UserToListDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-07-30T12:00:24+0300",
+    date = "2025-07-30T12:10:15+0300",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.15 (Ubuntu)"
 )
 @Component

@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.models.dto.InfoSystemDto;
 import ru.otus.hw.services.InfoSystemService;
 import ru.otus.hw.services.ProductService;
+import ru.otus.hw.services.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,10 @@ class InfosystemPagesControllerTest {
 
     @MockBean
     private ProductService productService;
+
+    @MockBean
+    private UserService userService;
+
 
     private final List<InfoSystemDto> infoSystems = List.of(new InfoSystemDto(1L, "1C-Бухалтерия",false,"",0),
              new InfoSystemDto(1L, "Документооборот",false,"",0));

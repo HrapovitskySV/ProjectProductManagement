@@ -15,10 +15,10 @@ spring:
     username: postgres
     password: secret
     #driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    separator: ^
   sql:
     init:
       mode: always
+      separator: ^
       #mode: never
       #data-locations: data.sql
       #schema-locations: schema.sql
