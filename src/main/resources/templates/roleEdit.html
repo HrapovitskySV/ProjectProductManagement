@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit Role</title>
+    <link th:replace="fragments/general.html :: linkBootstrap"></link>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input:read-only {
+            background: lightgray;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+    </style>
+    <script th:replace="fragments/general.html :: scriptBootstrap"></script>
+    <script>
+        function saveRole() {
+            const idInput = document.getElementById("id-input")
+            const nameInput = document.getElementById("name-input")
+            const role = {id: idInput.value, name: nameInput.value}
+            fetch("/api/roles", {
+                method: '[[${method}]]',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(role)})
+            .then(response => {
+                if (!response.ok) {
+                    response.text().then(function (text) {
+                        let diverror = document.getElementById(`diverror`)
+                        diverror.innerHTML=text;
+                    });
+                    throw new Error('Network error');
+                }
+                document.location.href = '[[${redirectUrl}]]'
+               })
+        }
+    </script>
+</head>
+<body>
+
+<!-- Role edition -->
+<form id="edit-form" th:object="${role}">
+    <h3>Role Info:</h3>
+
+    <div class="row">
+        <label for="id-input">ID:</label>
+        <input id="id-input" type="text" readonly="readonly" value="1" th:value="*{id}" class="form-control"/>
+    </div>
+
+    <div class="row">
+        <label for="name-input">Name:</label>
+        <input id="name-input" name="name" type="text" value="Administrator" th:value="*{name}" class="form-control"/>
+    </div>
+
+    <div class="mb-3">
+        <button type="button" onclick="saveRole()" class="btn btn-primary btn-lg">Save</button>
+        <a href="roleList.html" th:href="@{/roles}"><button type="button" class="btn btn-secondary btn-lg">Cancel</button></a>
+    </div>
+
+    <div id="diverror"></div>
+</form>
+
+</body>
+</html>

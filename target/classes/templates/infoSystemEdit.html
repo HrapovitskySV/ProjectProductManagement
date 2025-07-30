@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit Infosystem</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input:read-only {
+            background: lightgray;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script>
+        function saveInfosystem() {
+            const idInput = document.getElementById("id-input")
+            const nameInput = document.getElementById("name-input")
+            const useWebHookInput = document.getElementById("useWebHook-input")
+            const urlWebHookInput = document.getElementById("urlWebHook-input")
+            const productInput = document.getElementById("product-input")
+
+            const Infosystem = {id: idInput.value, name: nameInput.value, useWebHook: useWebHookInput.checked, urlWebHook: urlWebHookInput.value, primaryProductId: productInput.value}
+            fetch("/api/infosystems", {
+                method: '[[${method}]]',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(Infosystem)})
+            .then(response => {
+                if (!response.ok) {
+                    response.text().then(function (text) {
+                        let diverror = document.getElementById(`diverror`)
+                        diverror.innerHTML=text;
+                    });
+                    throw new Error('Network error');
+                }
+                document.location.href = '[[${redirectUrl}]]'
+               })
+        }
+    </script>
+</head>
+<body>
+
+<!-- Infosystem edition -->
+<form id="edit-form" th:object="${infoSystem}">
+    <h3>Infosystem Info:</h3>
+
+    <div class="row">
+        <label for="id-input">ID:</label>
+        <input id="id-input" type="text" readonly="readonly" value="1" th:value="*{id}" class="form-control"/>
+    </div>
+
+    <div class="row">
+        <label for="name-input">Name:</label>
+        <input id="name-input" name="name" type="text" value="1C" th:value="*{name}" class="form-control"/>
+    </div>
+
+    <div class="row">
+        Product:
+        <select id="product-input"  th:field="${infoSystem.primaryProductId}" class="form-control">
+            <option value="0">select product</option>
+            <option th:each="product : ${products}" th:value="${product.id}" th:text="${product.Name}" th:selected="${infoSystem.primaryProductId==product.id}"></option>
+        </select>
+    </div>
+
+    <div class="form-check">
+        <input id="useWebHook-input" name="useWebHook" type="checkbox" th:checked="*{useWebHook}" class="form-check-input" >
+        <label for="useWebHook-input" class="form-check-label">Use WebHook:</label>
+    </div>
+
+    <div class="row">
+        <label for="urlWebHook-input">URL WebHook:</label>
+        <input id="urlWebHook-input" name="urlWebHook" type="text" value="" th:value="*{urlWebHook}" class="form-control"/>
+    </div>
+
+    <div class="mb-3">
+        <button type="button" onclick="saveInfosystem()" class="btn btn-primary btn-lg">Save</button>
+        <a href="infoSystemList.html" th:href="@{/infosystems}"><button type="button" class="btn btn-secondary btn-lg">Cancel</button></a>
+    </div>
+
+    <div id="diverror"></div>
+</form>
+
+</body>
+</html>
