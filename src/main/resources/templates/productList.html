@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>List of all products</title>
+    <link th:replace="fragments/general.html :: linkBootstrap"></link>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        .persons {
+            border: 1px solid steelblue;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .persons tr td, th {
+            padding: 5px;
+            border: 1px solid steelblue;
+        }
+
+        .persons td:last-child, td:first-child {
+            width: 50px;
+        }
+    </style>
+    <script th:replace="fragments/general.html :: scriptBootstrap"></script>
+    <script>
+
+
+    function fillTable(products) {
+        let strTBody = ``
+        let tbody = document.getElementById(`tbody`)
+
+        products.forEach(product=>{
+            strTBody += `
+                <tr>
+                    <td>${product.id}</td>
+                    <td>${product.name}</td>
+                    <td>
+                        <a href="/products/edit/${product.id}">Edit</a>
+                    </td>
+
+                </tr>
+            `})
+        tbody.innerHTML=strTBody
+    }
+
+    function getAllProducts() {
+        fetch("/api/products", {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+         })
+        .then(response => response.json())
+        .then(json => {fillTable(json)})
+    }
+
+  function deleteProduct(id) {
+        fetch("/api/products/"+id, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+         })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network error');
+            }
+            getAllTasks()
+        })
+    }
+    </script>
+</head>
+
+<body onload="getAllProducts()">
+<div th:replace="fragments/general.html :: navbar"></div>
+<h3>Info products:</h3>
+
+<a href = "add.html" th:href = "@{/products/add}">Add new</a>
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>edit</th>
+    </tr>
+    </thead>
+    <tbody id="tbody">
+    <tr>
+        <td colspan="3">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
