@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit task</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input:read-only {
+            background: lightgray;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script>
+
+        function saveTask() {
+            const idInput = document.getElementById("id-input")
+            const nameInput = document.getElementById("name-input")
+            const tasktypeInput = document.getElementById("tasktype-input")
+            const authorInput = document.getElementById("author-input")
+            const laborcostsInput = document.getElementById("laborcosts-input")
+            const priorityInput = document.getElementById("priority-input")
+            const productInput = document.getElementById("product-input")
+            const infoSystemInput = document.getElementById("infoSystem-input")
+            const responsibleInput = document.getElementById("responsible-input")
+            const programmerInput = document.getElementById("programmer-input")
+            const analystInput = document.getElementById("analyst-input")
+
+            const descriptionInput = document.getElementById("description-input")
+
+
+            const task = {id: idInput.value,
+                            name: nameInput.value,
+                            taskTypeId: tasktypeInput.value,
+                            authorId: authorInput.value,
+                            laborcosts: laborcostsInput.value,
+                            priority: priorityInput.value,
+                            productId: productInput.value,
+                            infoSystemId: infoSystemInput.value,
+                            responsibleId: responsibleInput.value,
+                            programmerId: programmerInput.value,
+                            analystId: analystInput.value,
+                            description: descriptionInput.value}
+            fetch("/api/tasks", {
+                method: '[[${method}]]',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(task)})
+            .then(response => {
+                if (!response.ok) {
+                    response.text().then(function (text) {
+                        let diverror = document.getElementById(`diverror`)
+                        diverror.innerHTML=text;
+                    });
+                    throw new Error('Network error');
+                }
+                document.location.href = '[[${redirectUrl}]]'
+               })
+        }
+
+    function fillTableComments(comments) {
+        let strTBody = ``
+        let tbody = document.getElementById(`tbodycomment`)
+
+        comments.forEach(comment=>{
+            strTBody += `
+                <tr>
+                    <td>${comment.created}</td>
+                    <td>${comment.comment}</td>
+                    <td>${comment.author==null ? "" : comment.author.username}</td>
+                </tr>
+            `})
+        tbody.innerHTML=strTBody
+    }
+
+    function getAllComments(taskId) {
+        fetch("/api/comments/task/"+taskId, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+         })
+        .then(response => response.json())
+        .then(json => {fillTableComments(json)})
+    }
+
+    function saveComment() {
+            const idInput = document.getElementById("id-input")
+            const commentInput = document.getElementById("comment-input")
+
+
+            const comment = {taskId: idInput.value,
+                            comment: commentInput.value}
+            fetch("/api/comments", {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(comment)})
+            .then(response => {
+                if (!response.ok) {
+                    response.text().then(function (text) {
+                        let diverror = document.getElementById(`diverror`)
+                        diverror.innerHTML=text;
+                    });
+                    throw new Error('Network error');
+                }
+
+                const modalDiv = document.getElementById("exampleModal");
+                const modal = bootstrap.Modal.getInstance(modalDiv);
+                modal.hide();
+                getAllComments(idInput.value);
+               })
+        }
+    </script>
+</head>
+<body th:onload="'getAllComments('+${task.id}+')'">
+
+<!-- Task edition -->
+<form id="edit-form" th:object="${task}">
+    <h3>Task Info:</h3>
+
+    <div class="row">
+        <div class="col">
+            <label for="id-input">ID:</label>
+            <input id="id-input" type="text" readonly="readonly" value="0" th:value="*{id}" class="form-control"/>
+        </div>
+        <div class="col">
+            <label for="id-created">Created:</label>
+            <input id="id-created" type="datetime-local" readonly="readonly"  th:value="*{created}" class="form-control"/>
+        </div>
+        <div class="col">
+            Type:
+            <select id="tasktype-input"  th:field="${task.taskType}" class="form-control">
+                <option value="0">select type</option>
+                <option th:each="tasktype : ${taskTypes}" th:value="${tasktype.id}" th:text="${tasktype.Name}" th:selected="${task.taskType==tasktype}"></option>
+            </select>
+        </div>
+
+        <div class="col">
+            Author:
+            <select id="author-input"  th:field="${task.author}" class="form-control" disabled>
+                <option th:value="${task.author==null? 0 :task.author.id}" th:text="${task.author==null? '' :task.author.username}" th:selected="true"></option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <label for="name-input">Name:</label>
+        <input id="name-input" name="Name" type="text" value="name" th:value="*{name}" class="form-control"/>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <label for="laborcosts-input">Laborcosts:</label>
+            <input id="laborcosts-input" name="laborcosts" type="number" value="0" th:value="*{laborcosts}" class="form-control"/>
+        </div>
+        <div class="col">
+            <label for="priority-input">Priority:</label>
+            <input id="priority-input" name="priority" type="number" value="0" th:value="*{priority}" class="form-control"/>
+        </div>
+        <div class="col">
+            Product:
+            <select id="product-input"  th:field="${task.product}" class="form-select">
+                <option value="0">select product</option>
+                <option th:each="product : ${products}" th:value="${product.id}" th:text="${product.Name}" th:selected="${task.product==product}"></option>
+            </select>
+        </div>
+        <div class="col">
+            System:
+            <select id="infoSystem-input"  th:field="${task.infoSystem}" class="form-select">
+                <option value="0">select system</option>
+                <option th:each="infoSystem : ${infoSystems}" th:value="${infoSystem.id}" th:text="${infoSystem.Name}" th:selected="${task.infoSystem==infoSystem}"></option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col">
+            Responsible:
+            <select id="responsible-input"  class="form-select">
+                <option value="0">select responsible</option>
+                <option th:each="user: ${users}" th:value="${user.id}" th:text="${user.username}" th:selected="${user==task.responsible}"></option>
+            </select>
+        </div>
+        <div class="col">
+            Programmer:
+            <select id="programmer-input"   class="form-select">
+                <option value="0">select programmer</option>
+                <option th:each="user: ${users}" th:value="${user.id}" th:text="${user.username}" th:selected="${user==task.programmer}"></option>
+            </select>
+        </div>
+        <div class="col">
+            Analyst:
+            <select id="analyst-input"   class="form-select">
+                <option value="0">select analyst</option>
+                <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username}" th:selected="${task.analyst==user}"></option>
+            </select>
+        </div>
+        <div class="col">
+            <p>
+        </div>
+    </div>
+
+    <div class="row">
+        <b>Description:</b>
+        <textarea id="description-input" name="description" th:field="*{description}" rows="5" class="form-control"></textarea>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th>created</th>
+            <th>comment</th>
+            <th>author</th>
+        </tr>
+        </thead>
+        <tbody id="tbodycomment">
+        <tr>
+            <td colspan="9">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+
+
+    <div class="mb-3">
+        <button type="button" onclick="saveTask()" class="btn btn-primary btn-lg">Save</button>
+        <a href="taskList.html" th:href="@{/tasks}"><button type="button" class="btn btn-secondary btn-lg">Cancel</button></a>
+        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#exampleModal" th:if="${task.id!=0}">
+            Add comment
+        </button>
+    </div>
+
+    <div id="diverror"></div>
+
+    <!-- Модальное окно -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Add comment</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8 mx-auto">
+                            <p th:text="${message}" th:if="${message ne null}" class="alert alert-primary"></p>
+
+
+                                <div>
+                                    <b>Comment:</b>
+                                    <textarea id="comment-input" name="comment"  rows="5" class="form-control"></textarea>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <div class="col">
+                                        <button  type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                    <div class="col">
+                                        <button type="button" onclick="saveComment()" class="btn btn-primary">Save comment</button>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>
+
+</body>
+</html>
